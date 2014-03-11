@@ -1,11 +1,13 @@
-
 public class DistanceAlg
 {
 	private double lat1;
 	private double lon1;
 	private double lat2;
 	private double lon2;
-	
+	private double close = .5;
+	private double med = 1;
+	private double far = 5;
+
 	public DistanceAlg(double lat1, double lon1, double lat2, double lon2)
 	{
 		this.lat1 = lat1;
@@ -13,7 +15,7 @@ public class DistanceAlg
 		this.lat2 = lat2;
 		this.lon2 = lon2;
 	}
-	
+
 	public int getDistance()	
 	{
 		double earthRadius = 3958.756;
@@ -27,12 +29,20 @@ public class DistanceAlg
 		double distance = earthRadius * c;
 		return getRank(distance);
 	}
-	
+
 	public int getRank(double distance)
 	{
-		if (distance <= .5) return 1;
-		else if (distance <= 1.0) return 2;
-		else if (distance <= 5.0) return 3;
+		if (distance <= close) return 1;
+		else if (distance <= med) return 2;
+		else if (distance <= far) return 3;
 		else return 0;
+	}
+	
+	public void setDistancePref(String distLabel, double distance)
+	{
+		if (distLabel.equals("close")) close = distance;
+		else if (distLabel.equals("med")) med = distance;
+		else if (distLabel.equals("far")) far = distance;
+		else System.out.println("Invalid label");
 	}
 }
