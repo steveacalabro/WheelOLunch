@@ -1,0 +1,41 @@
+package com.drexel.wheeloflunch;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.View;
+import android.widget.EditText;
+
+public class NewPlaceActivity extends Activity 
+{
+	private EditText nameTxt = null;
+	private EditText ratingTxt = null;
+	private EditText typeTxt = null;
+	private EditText latTxt = null;
+	private EditText longTxt = null;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) 
+	{
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_newplace);
+	}
+	public void newPlace(View view)
+	{
+		nameTxt = (EditText)findViewById(R.id.nameTxt);
+		ratingTxt = (EditText)findViewById(R.id.regBtn);
+		typeTxt = (EditText)findViewById(R.id.typeTxt);
+		latTxt = (EditText)findViewById(R.id.latTxt);
+		longTxt = (EditText)findViewById(R.id.longTxt);
+		
+		System.out.println("test");
+	}
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) 
+	{
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.newplace, menu);
+		return true;
+	}
+
+}

@@ -1,0 +1,53 @@
+package com.drexel.wheeloflunch;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.View;
+
+import com.cloudmine.api.CMUser;
+import com.cloudmine.api.rest.CMStore;
+import com.cloudmine.api.rest.callbacks.CreationResponseCallback;
+import com.cloudmine.api.rest.response.CreationResponse;
+import com.cloudmine.api.rest.response.code.CMResponseCode;
+
+public class RegisterActivity extends Activity 
+{
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) 
+	{
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_register);
+		
+		CMUser user = new CMUser("test@example.com", "the-password");
+		 
+		user.createUser(new CreationResponseCallback() 
+		{
+		    public void onCompletion(CreationResponse response) 
+		    {
+		        System.out.println("was user created? " + response.wasSuccess());
+		        boolean userAlreadyExists =
+		                          response.getResponseCode().equals(CMResponseCode.EMAIL_ALREADY_EXISTS);
+		        if(userAlreadyExists) {
+		            log("User with that e-mail address already exists; user was not created");
+		        } else {
+		            // configure the store with the user so that it can perform user-centric operations
+		            CMStore.getStore().setUser(user);
+		        }
+		    }
+		});
+	}
+	public void test(View view)
+	{
+		
+	}
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) 
+	{
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.register, menu);
+		return true;
+	}
+
+}

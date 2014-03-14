@@ -1,0 +1,15 @@
+package com.drexel.wheeloflunch;
+
+public class Place 
+{
+	private String name;
+	private int rating;
+	private String type;
+	private double lat;
+	private double lng;
+	
+	public Place(String _name, int _rating, String _type, double _lat, double _lng)
+	{
+		
+	}
+}

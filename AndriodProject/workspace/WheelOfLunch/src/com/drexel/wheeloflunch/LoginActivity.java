@@ -18,7 +18,7 @@ import com.cloudmine.api.rest.response.LoginResponse;
 public class LoginActivity extends Activity 
 {
 	private static final String APP_ID = "847c4a9387424df28636c133b4b6ec0a";
-	private static final String API_KEY = "48bd2e8c6a43482b8847bfb7c07db6e0";
+	private static final String API_KEY = "77e84025f6254ba48544fa87c0a3ebbb";
 	
 	private EditText  username=null;
 	private EditText  password=null;
@@ -81,9 +81,9 @@ public class LoginActivity extends Activity
 	}
 	public void register(View view)
 	{
-		/*Intent i = new Intent(getBaseContext(), RegisterActivity.class);                      
+		Intent i = new Intent(getBaseContext(), RegisterActivity.class);                      
 		//i.putExtra("PersonID", personID);
-		startActivity(i);*/
+		startActivity(i);
 		/*final CMUser user = new CMUser("steve.a.calabro@gmail.com", "test");
 		 
 		user.c reateUser(new CreationResponseCallback() 
