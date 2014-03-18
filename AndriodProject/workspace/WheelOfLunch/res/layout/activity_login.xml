@@ -57,7 +57,7 @@
         android:layout_below="@+id/signInBtn"
         android:layout_marginTop="34dp"
         android:onClick="loginWithFacebook"
-        android:visibility="invisible" />
+        android:visibility="visible" />
 
     <Button
         android:id="@+id/signInBtn"

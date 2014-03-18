@@ -67,11 +67,11 @@
 
             <ImageView
                 android:id="@+id/imageView_ring"
-                android:layout_width="175dp"
-                android:layout_height="175dp"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
                 android:layout_gravity="center"
                 android:scaleType="matrix"
-                android:src="@drawable/colorwheelsmall" >
+                android:src="@drawable/new_wheel" >
             </ImageView>
             
             <ImageView

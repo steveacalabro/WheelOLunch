@@ -107,7 +107,8 @@ public class LoginActivity extends Activity
 	
 	public void loginWithFacebook(View view)
 	{
-		CMApiCredentials.initialize(APP_ID, API_KEY, getApplicationContext());
+		Toast.makeText(getApplicationContext(), "Currenlty broken...:( Sorry", Toast.LENGTH_SHORT).show();
+		/*CMApiCredentials.initialize(APP_ID, API_KEY, getApplicationContext());
 		
 		CMAndroidSocial.loginThroughSocial(CMSocial.Service.FACEBOOK, this, new CMSocialLoginResponseCallback() 
 		{
@@ -143,7 +144,7 @@ public class LoginActivity extends Activity
 		    {
 		        System.out.println("Oh no we failed! " + t.getMessage());
 		    }
-		});
+		});*/
 	}
 	public void login(View view)
 	{

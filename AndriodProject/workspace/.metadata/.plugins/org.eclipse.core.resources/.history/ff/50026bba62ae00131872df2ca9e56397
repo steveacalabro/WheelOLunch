@@ -59,7 +59,7 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
     public double latitude;
     public double longtitude;
     
-    public int weather;
+    public int weather = 0;
     
     public ArrayList<Place> placeList = new ArrayList<Place>();
     
@@ -69,12 +69,18 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
     private float degrees = 10;
 	private long time = 10;
 	private float count = 0;
+	private int exCount;
 	
 	private static Bitmap imageOriginal, imageScaled;
 	private static Matrix matrix;
 
 	private ImageView dialer;
 	private int dialerHeight, dialerWidth;
+	
+	private double close;
+	private double med;
+	private double far;
+	private boolean customDistance;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -83,6 +89,30 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
 		setContentView(R.layout.activity_main);
 		
 		CMApiCredentials.initialize(APP_ID, API_KEY, getApplicationContext());
+		
+		//default distances
+		SharedPreferences pref = getApplicationContext().getSharedPreferences("DISTANCEPREF", MODE_PRIVATE);
+		
+		String closePref = pref.getString("close", null);
+		String medPref = pref.getString("med", null);
+		String farPref = pref.getString("far", null);
+		
+		if(closePref != null)
+		{
+			close = Double.parseDouble(closePref);
+			customDistance = true;
+		}
+		if(medPref != null)
+		{
+			med = Double.parseDouble(medPref);
+			customDistance = true;
+		}
+		if(farPref != null)
+		{
+			far = Double.parseDouble(farPref);
+			customDistance = true;
+		}
+		
 		
 		//maps
 		try 
@@ -93,8 +123,6 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
 						findFragmentById(R.id.map)).getMap();
 			}
 			googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-			/*Marker TP = googleMap.addMarker(new MarkerOptions().
-					position(TutorialsPoint).title("TutorialsPoint"));*/
 
 		}
 		catch (Exception e) 
@@ -142,7 +170,7 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
 	    }
 	    
 		//run through weather
-	    WeatherAlg wa = new WeatherAlg();
+	    /*WeatherAlg wa = new WeatherAlg();
 	    try 
 	    {
 	    	TextView line1 = (TextView)findViewById(R.id.wa1);
@@ -163,7 +191,7 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
 	    	e.printStackTrace();
 	    	Toast.makeText(getApplicationContext(), "Can't set weather", Toast.LENGTH_SHORT).show();
 	    	System.out.println("Can't set weather");
-	    }
+	    }*/
 	    
 	    fillPlaces();
 	    
@@ -171,7 +199,7 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
 	    // load the image only once
 	    if (imageOriginal == null) 
 	    {
-	    	imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.colorwheelsmall);
+	    	imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.new_wheel);
 	    }
 	    // initialize the matrix only once
 	    if (matrix == null) {
@@ -182,7 +210,7 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
 	    }
 
 	    dialer = (ImageView) findViewById(R.id.imageView_ring);
-	    dialer.setOnClickListener(OnClicked);
+	    //dialer.setOnClickListener(OnClicked);
 	    dialer.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 
 	    	@Override
@@ -211,7 +239,7 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
 	    
 	}
 	// rotate the Wheel
-	private void rotateDialer(final float degrees) 
+	private void rotateDialer(float degrees) 
 	{
 		matrix.postRotate(degrees, dialerWidth / 2, dialerHeight / 2);
 
@@ -230,16 +258,45 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
 
 	public void spinPlaces(View view)
 	{
-		rotateDialer(degrees);
-		/*if(placeList.size() > 0)
+		TextView tv = (TextView)findViewById(R.id.spinChoice);
+		tv.setText("Spinning");
+		
+		//rotateDialer(degrees);
+		// Use Handler to implement delayed task     
+		Handler handler = new Handler(); 
+		
+		Random generator = new Random();
+		exCount = generator.nextInt(200 - 50) + 50;
+		
+		for(int i=0;i<500+exCount;i++) 
+		{
+			handler.postDelayed(new Runnable() 
+			{ 
+				public void run() {
+					count++;
+					rotateDialer(degrees-(count/(50+(exCount/10)))); // spins gradually slower based on count
+					
+					if(count == 500+exCount)
+					{
+						pickPlace();
+					}
+				} 
+			}, i*time);
+		}
+		count = 0; // reset count back to 0 to reset spin speed
+	}
+	
+	public void pickPlace()
+	{
+		if(placeList.size() > 0)
 		{
 			Random generator = new Random();
 			int num = generator.nextInt(placeList.size());
 			
-			//TextView tv = (TextView)findViewById(R.id.spinChoice);
+			TextView tv = (TextView)findViewById(R.id.spinChoice);
 			
 			final Place p = placeList.get(num);
-			//tv.setText(p.getName());
+			tv.setText(p.getName());
 			
 			// create marker
 			MarkerOptions marker = new MarkerOptions().position(new LatLng(p.getLat(), p.getLong())).title(p.getName());
@@ -270,9 +327,8 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
 		else
 		{
 				Toast.makeText(getApplicationContext(), "No Places In your area!!!!(Try Reopening)", Toast.LENGTH_SHORT).show();
-		}*/
+		}
 	}
-	
 	public void fillPlaces()
 	{
 		//get the objects
@@ -298,6 +354,12 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
 	    	    	{
 	    	    		Place cur = placeList.get(i);
 	    	    		DistanceAlg da = new DistanceAlg(latitude, longtitude, cur.getLat(), cur.getLong());
+	    	    		if(customDistance)
+	    	    		{
+	    	    			da.setDistancePref("close", close);
+		    	    		da.setDistancePref("med", close);
+		    	    		da.setDistancePref("far", close);
+	    	    		}
 	    	    		cur.setDistance(da.getDistance());
 
 	    	    		placeList.set(i, cur);
@@ -353,6 +415,10 @@ public class MainActivity extends Activity implements LocationListener//, OnMark
 	    });
 	}
 	
+	public void viewPref(MenuItem menuItem)
+	{
+		startActivity(new Intent(this, Prefs.class));
+	}
 	public void logout(MenuItem menuItem)
 	{
 		SharedPreferences pref = getApplicationContext().getSharedPreferences("LOGINPREF", MODE_PRIVATE); 
