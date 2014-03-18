@@ -33,42 +33,64 @@
             android:id="@+id/wa2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/not_set"/>
+            android:text="@string/not_set" />
 
         <TextView
             android:id="@+id/wa3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/not_set" />
-
     </LinearLayout>
-	
-	<LinearLayout
-	    android:layout_width="match_parent"
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-		<Button
-		    android:id="@+id/button1"
-		    android:layout_width="0dp"
-		    android:layout_height="wrap_content"
-		    android:layout_weight="1"
-		    android:text="@string/spinBtn"
-		    android:onClick="spinPlaces" />
-
+        <Button
+            android:id="@+id/button1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="spinPlaces"
+            android:text="@string/spinBtn" />
     </LinearLayout>
-	    
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="0.50"
         android:gravity="center" >
-		
-        <TextView
-            android:id="@+id/spinChoice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="choice" />
-		
+
+        <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <ImageView
+                android:id="@+id/imageView_ring"
+                android:layout_width="175dp"
+                android:layout_height="175dp"
+                android:layout_gravity="center"
+                android:scaleType="matrix"
+                android:src="@drawable/colorwheelsmall" >
+            </ImageView>
+            
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center_vertical"
+                android:scaleType="fitCenter"
+                android:src="@drawable/arrow" />
+
+            <TextView
+                android:id="@+id/spinChoice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|bottom"
+                android:text="@string/choice" />
+            
+        </FrameLayout>
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -76,13 +98,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="0.50" >
-        
+
         <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.MapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-        
-	</RelativeLayout>
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
 
 </LinearLayout>

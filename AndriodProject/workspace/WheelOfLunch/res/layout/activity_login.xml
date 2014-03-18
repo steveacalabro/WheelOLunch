@@ -56,6 +56,7 @@
         android:layout_alignLeft="@+id/passwordTxt"
         android:layout_below="@+id/signInBtn"
         android:layout_marginTop="34dp"
+        android:onClick="loginWithFacebook"
         android:visibility="invisible" />
 
     <Button

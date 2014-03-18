@@ -8,17 +8,28 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cloudmine.api.CMAndroidSocial;
 import com.cloudmine.api.CMApiCredentials;
 import com.cloudmine.api.CMObject;
 import com.cloudmine.api.SimpleCMObject;
@@ -29,10 +40,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MainActivity extends Activity implements LocationListener
+public class MainActivity extends Activity implements LocationListener//, OnMarkerClickListener
 {
+	//android:debuggable="true"
 	private static final String APP_ID = "847c4a9387424df28636c133b4b6ec0a";
 	private static final String API_KEY = "77e84025f6254ba48544fa87c0a3ebbb";
 	
@@ -50,6 +63,25 @@ public class MainActivity extends Activity implements LocationListener
     
     public ArrayList<Place> placeList = new ArrayList<Place>();
     
+    public Menu mainMenu = null;
+    
+    //Wheel spin
+    private float degrees = 10;
+	private long time = 10;
+	private float count = 0;
+	private int exCount;
+	
+	private static Bitmap imageOriginal, imageScaled;
+	private static Matrix matrix;
+
+	private ImageView dialer;
+	private int dialerHeight, dialerWidth;
+	
+	private double close;
+	private double med;
+	private double far;
+	private boolean customDistance;
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -57,6 +89,30 @@ public class MainActivity extends Activity implements LocationListener
 		setContentView(R.layout.activity_main);
 		
 		CMApiCredentials.initialize(APP_ID, API_KEY, getApplicationContext());
+		
+		//default distances
+		SharedPreferences pref = getApplicationContext().getSharedPreferences("DISTANCEPREF", MODE_PRIVATE);
+		
+		String closePref = pref.getString("close", null);
+		String medPref = pref.getString("med", null);
+		String farPref = pref.getString("far", null);
+		
+		if(closePref != null)
+		{
+			close = Double.parseDouble(closePref);
+			customDistance = true;
+		}
+		if(medPref != null)
+		{
+			med = Double.parseDouble(medPref);
+			customDistance = true;
+		}
+		if(farPref != null)
+		{
+			far = Double.parseDouble(farPref);
+			customDistance = true;
+		}
+		
 		
 		//maps
 		try 
@@ -91,7 +147,7 @@ public class MainActivity extends Activity implements LocationListener
 	    }
 		else
 		{
-			Toast.makeText(this, "GPS is Enabled in your devide", Toast.LENGTH_SHORT).show();
+			//Toast.makeText(this, "GPS is Enabled in your devide", Toast.LENGTH_SHORT).show();
 		}
 		
 		// Get the location manager
@@ -141,9 +197,98 @@ public class MainActivity extends Activity implements LocationListener
 	    
 	    fillPlaces();
 	    
+	    //Wheel
+	    // load the image only once
+	    if (imageOriginal == null) 
+	    {
+	    	imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.colorwheelsmall);
+	    }
+	    // initialize the matrix only once
+	    if (matrix == null) {
+	    	matrix = new Matrix();
+	    } else {
+	    	// not needed, you can also post the matrix immediately to restore the old state
+	    	matrix.reset();
+	    }
+
+	    dialer = (ImageView) findViewById(R.id.imageView_ring);
+	    //dialer.setOnClickListener(OnClicked);
+	    dialer.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+
+	    	@Override
+	    	public void onGlobalLayout() 
+	    	{
+	    		// method called more than once, but the values only need to be initialized one time
+	    		if (dialerHeight == 0 || dialerWidth == 0) {
+	    			dialerHeight = dialer.getHeight();
+	    			dialerWidth = dialer.getWidth();
+
+	    			// resize
+	    			Matrix resize = new Matrix();
+	    			resize.postScale((float)Math.min(dialerWidth, dialerHeight) / (float)imageOriginal.getWidth(), (float)Math.min(dialerWidth, dialerHeight) / (float)imageOriginal.getHeight());
+	    			imageScaled = Bitmap.createBitmap(imageOriginal, 0, 0, imageOriginal.getWidth(), imageOriginal.getHeight(), resize, false);
+
+	    			// translate to the image view's center
+	    			float translateX = dialerWidth / 2 - imageScaled.getWidth() / 2;
+	    			float translateY = dialerHeight / 2 - imageScaled.getHeight() / 2;
+	    			matrix.postTranslate(translateX, translateY);
+
+	    			dialer.setImageBitmap(imageScaled);
+	    			dialer.setImageMatrix(matrix);
+	    		}
+	    	}
+	    });
+	    
+	}
+	// rotate the Wheel
+	private void rotateDialer(float degrees) 
+	{
+		matrix.postRotate(degrees, dialerWidth / 2, dialerHeight / 2);
+
+		dialer.setImageMatrix(matrix);
+	}
+
+	// Spin the wheel when clicked
+	final OnClickListener OnClicked = new OnClickListener() 
+	{
+		public void onClick(final View v) {
+
+			
+			
+		}
+	};
+
+	public void spinPlaces(View view)
+	{
+		TextView tv = (TextView)findViewById(R.id.spinChoice);
+		tv.setText("Spinning");
+		
+		//rotateDialer(degrees);
+		// Use Handler to implement delayed task     
+		Handler handler = new Handler(); 
+		
+		Random generator = new Random();
+		exCount = generator.nextInt(200 - 50) + 50;
+		
+		for(int i=0;i<500+exCount;i++) 
+		{
+			handler.postDelayed(new Runnable() 
+			{ 
+				public void run() {
+					count++;
+					rotateDialer(degrees-(count/(50+(exCount/10)))); // spins gradually slower based on count
+					
+					if(count == 500+exCount)
+					{
+						pickPlace();
+					}
+				} 
+			}, i*time);
+		}
+		count = 0; // reset count back to 0 to reset spin speed
 	}
 	
-	public void spinPlaces(View view)
+	public void pickPlace()
 	{
 		if(placeList.size() > 0)
 		{
@@ -152,7 +297,7 @@ public class MainActivity extends Activity implements LocationListener
 			
 			TextView tv = (TextView)findViewById(R.id.spinChoice);
 			
-			Place p = placeList.get(num);
+			final Place p = placeList.get(num);
 			tv.setText(p.getName());
 			
 			// create marker
@@ -163,13 +308,29 @@ public class MainActivity extends Activity implements LocationListener
 			googleMap.addMarker(marker);
 			LatLng ll = new LatLng(p.getLat(), p.getLong());
 			googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(ll, 17));
+			
+			latitude = Math.round(latitude*1000.0)/1000.0;
+			longtitude = Math.round(longtitude*1000.0)/1000.0;
+			
+			final double lat1 =  Math.round(p.getLat()*1000.0)/1000.0;
+			final double long1 = Math.round(p.getLong()*1000.0)/1000.0;
+			
+			googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() 
+			{
+			    @Override public boolean onMarkerClick(Marker marker) 
+			    {
+			    	Intent navigation = new Intent(Intent.ACTION_VIEW, Uri.parse("http://maps.google.com/maps?saddr="+latitude+","+longtitude+"&daddr="+lat1+","+long1+""));
+			    	startActivity(navigation);
+			        return true;
+			    }
+			}
+			);
 		}
 		else
 		{
 				Toast.makeText(getApplicationContext(), "No Places In your area!!!!(Try Reopening)", Toast.LENGTH_SHORT).show();
 		}
 	}
-	
 	public void fillPlaces()
 	{
 		//get the objects
@@ -195,6 +356,12 @@ public class MainActivity extends Activity implements LocationListener
 	    	    	{
 	    	    		Place cur = placeList.get(i);
 	    	    		DistanceAlg da = new DistanceAlg(latitude, longtitude, cur.getLat(), cur.getLong());
+	    	    		if(customDistance)
+	    	    		{
+	    	    			da.setDistancePref("close", close);
+		    	    		da.setDistancePref("med", close);
+		    	    		da.setDistancePref("far", close);
+	    	    		}
 	    	    		cur.setDistance(da.getDistance());
 
 	    	    		placeList.set(i, cur);
@@ -249,6 +416,32 @@ public class MainActivity extends Activity implements LocationListener
 	    	}
 	    });
 	}
+	
+	public void viewPref(MenuItem menuItem)
+	{
+		startActivity(new Intent(this, Prefs.class));
+	}
+	public void logout(MenuItem menuItem)
+	{
+		SharedPreferences pref = getApplicationContext().getSharedPreferences("LOGINPREF", MODE_PRIVATE); 
+		pref.edit().clear().commit();
+		
+		Toast.makeText(getApplicationContext(), "Logging out", Toast.LENGTH_SHORT).show();
+		
+		CMAndroidSocial.clearSessionCookies(this);
+		/*try 
+		{
+			Thread.sleep(1000);
+		} 
+		catch (InterruptedException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		
+		Intent i = new Intent(getBaseContext(), LoginActivity.class);                      
+		startActivity(i);
+	}
 	@Override
 	public void onLocationChanged(Location location) 
 	{
@@ -268,13 +461,13 @@ public class MainActivity extends Activity implements LocationListener
 	@Override
 	public void onProviderEnabled(String provider) 
 	{
-		Toast.makeText(this, "Enabled new provider " + provider, Toast.LENGTH_SHORT).show();
+		//Toast.makeText(this, "Enabled new provider " + provider, Toast.LENGTH_SHORT).show();
 
 	}
 	@Override
 	public void onProviderDisabled(String provider) 
 	{
-		Toast.makeText(this, "Disabled provider " + provider, Toast.LENGTH_SHORT).show();
+		//Toast.makeText(this, "Disabled provider " + provider, Toast.LENGTH_SHORT).show();
 	}
     /* Request updates at startup */
     @Override
@@ -296,8 +489,10 @@ public class MainActivity extends Activity implements LocationListener
     /**
      * function to load map. If map is not created it will create it for you
      * */
-    private void initilizeMap() {
-        if (googleMap == null) {
+    private void initilizeMap() 
+    {
+        if (googleMap == null)
+        {
             googleMap = ((MapFragment) getFragmentManager().findFragmentById(
                     R.id.map)).getMap();
  
@@ -315,6 +510,7 @@ public class MainActivity extends Activity implements LocationListener
 	{
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
+
 		return true;
 	}
 

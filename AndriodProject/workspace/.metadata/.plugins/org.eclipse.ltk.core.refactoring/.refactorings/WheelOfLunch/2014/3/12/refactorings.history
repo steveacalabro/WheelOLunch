@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move element &apos;prefs.xml&apos; to &apos;layout&apos;&#x0A;- Original project: &apos;WheelOfLunch&apos;&#x0A;- Destination element: &apos;layout&apos;&#x0A;- Original element: &apos;prefs.xml&apos;&#x0A;- Update references to refactored element" description="Move file" element1="res/xml/prefs.xml" files="1" flags="589830" folders="0" id="org.eclipse.jdt.ui.move" policy="org.eclipse.jdt.ui.moveResources" qualified="false" references="true" stamp="1395112472205" target="res/layout" units="0" version="1.0"/>
+</session>

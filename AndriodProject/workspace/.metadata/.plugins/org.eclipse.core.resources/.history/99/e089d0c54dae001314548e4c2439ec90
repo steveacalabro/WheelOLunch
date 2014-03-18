@@ -1,0 +1,28 @@
+package com.drexel.wheeloflunch;
+
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.preference.PreferenceActivity;
+
+public class Prefs extends PreferenceActivity 
+{
+    @Override
+    public void onCreate(Bundle savedInstanceState) 
+    {
+        super.onCreate(savedInstanceState);
+        addPreferencesFromResource(R.layout.prefs);
+        
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("LOGINPREF", MODE_PRIVATE);
+    	pref.getString("close", );
+    } 
+    
+    @Override
+    public void onDestroy()
+    {
+    	SharedPreferences pref = getApplicationContext().getSharedPreferences("LOGINPREF", MODE_PRIVATE);
+    	pref.getString(key, "");
+    	SharedPreferences.Editor editor = settings.edit();
+        editor.putString(key, value);
+        editor.commit(); 
+    }
+}
